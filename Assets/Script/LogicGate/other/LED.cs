@@ -2,16 +2,22 @@ using UnityEngine;
 
 public class LED : MonoBehaviour
 {
-    [Header("Input ที่ใช้ควบคุม LED")]
-    public InputConnector input;  // รับค่าจาก InputConnector
+    [Header("Input ที่ใช้ควบคุม LED (ต้องเชื่อมต่อกับ Output ของ Gate เท่านั้น)")]
+    public InputConnector input;  // รับค่าจาก InputConnector ของวงจรดิจิตอล
 
     [Header("วัตถุที่ต้องการควบคุมสีเพิ่มเติม")]
     public GameObject targetObject; // วัตถุที่ต้องการให้เปลี่ยนสีตาม LED
 
     private Renderer ledRenderer;
     private Renderer targetRenderer;
-    private Light targetLight; // เพิ่ม Light สำหรับแสดงแสง
+    private Light targetLight; // ใช้สำหรับแสดงแสง
     private Material targetMaterial; // เก็บ Material ของ targetObject
+
+    // เพิ่ม property isOn เพื่อให้ QuizManager2 เรียกใช้งานได้
+    public bool isOn
+    {
+        get { return input != null ? input.isOn : false; }
+    }
 
     void Start()
     {
@@ -34,27 +40,30 @@ public class LED : MonoBehaviour
                 targetLight.color = Color.red; // ตั้งค่าให้แสงเป็นสีแดง
             }
         }
-        if (input != null)
-        {
-            input.gameObject.name = $"{gameObject.name}_IN";
-        }
+        
+        // หมายเหตุ: อย่าเปลี่ยนแปลง input หรือชื่อต่าง ๆ ที่เชื่อมต่อกับวงจร
+        // เพื่อให้แน่ใจว่า LED จะอัปเดตจากผลลัพธ์ของวงจรดิจิตอลเท่านั้น
 
-        UpdateState();
+        // อัปเดตสถานะของ LED ครั้งแรก (เรียกโดย ForceUpdateCircuit() ในระบบวงจร)
         UpdateState();
     }
 
+    // ปิดการเรียก Update() อัตโนมัติ เพื่อป้องกันการรีเฟรชสถานะจากการเปลี่ยนแปลงโดยตรง
+    // ให้ LED อัปเดตเฉพาะเมื่อวงจร (Gate) เรียก ForceUpdateCircuit() เพื่อควบคุมการคำนวณ
     void Update()
     {
         UpdateState();
     }
-
+    
+    // ฟังก์ชัน UpdateState() จะอัปเดตสถานะของ LED จาก input ที่คำนวณมาจากวงจรดิจิตอล
     public void UpdateState()
     {
         if (input != null)
         {
+            // ใช้ input.isOn ในการคำนวณสถานะของ LED
             bool isActive = input.isOn;
 
-            // เปลี่ยนสีของ LED
+            // เปลี่ยนสีของ LED ตามสถานะที่คำนวณได้
             if (ledRenderer != null)
             {
                 ledRenderer.material.color = isActive ? Color.red : Color.gray;
@@ -70,7 +79,7 @@ public class LED : MonoBehaviour
                     if (isActive)
                     {
                         targetMaterial.EnableKeyword("_EMISSION");
-                        targetMaterial.SetColor("_EmissionColor", Color.red * 2f); // เพิ่มความเข้มของ Emission
+                        targetMaterial.SetColor("_EmissionColor", Color.red * 2f);
                     }
                     else
                     {
@@ -82,7 +91,7 @@ public class LED : MonoBehaviour
             // ควบคุมแสงของ targetObject
             if (targetLight != null)
             {
-                targetLight.intensity = isActive ? 5f : 0f; // ปรับความสว่างของแสง
+                targetLight.intensity = isActive ? 5f : 0f;
             }
         }
     }

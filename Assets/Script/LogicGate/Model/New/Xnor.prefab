@@ -102,7 +102,7 @@ GameObject:
   - component: {fileID: 3188306494438770200}
   m_Layer: 0
   m_Name: Xnor
-  m_TagString: Gate
+  m_TagString: Digital
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

@@ -131,14 +131,14 @@ GameObject:
   - component: {fileID: 5355707919801992735}
   - component: {fileID: 6080687496167400480}
   - component: {fileID: 5182272798121929979}
-  - component: {fileID: 7931765672184374684}
+  - component: {fileID: 4294818114239813745}
   - component: {fileID: 6545703500334412018}
   - component: {fileID: 5928825618702493613}
   - component: {fileID: 819516658547507894}
   - component: {fileID: 8163009922415990221}
   m_Layer: 0
   m_Name: Nand
-  m_TagString: Gate
+  m_TagString: Digital
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -213,7 +213,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &7931765672184374684
+--- !u!114 &4294818114239813745
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

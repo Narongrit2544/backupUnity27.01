@@ -23,6 +23,7 @@ TagManager:
   - Resistor
   - Digital
   - Exam
+  - Gate
   layers:
   - Default
   - TransparentFX
