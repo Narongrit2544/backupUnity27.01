@@ -26,7 +26,6 @@ public class ToggleSwitch : MonoBehaviour
         UpdatePivotRotation();
     }
 
-
     private void OnMouseDown()
     {
         Toggle(); // เรียกใช้ Toggle()
@@ -39,7 +38,6 @@ public class ToggleSwitch : MonoBehaviour
         if (output != null)
         {
             output.isOn = isOn;
-            //Debug.Log($"🔄 ToggleSwitch {gameObject.name} กำลังส่งค่า {isOn} ไปยัง Output {output.gameObject.name}");
             output.UpdateState(); // อัปเดตค่าทุกจุดที่เชื่อมต่อ
         }
         else
@@ -48,6 +46,18 @@ public class ToggleSwitch : MonoBehaviour
         }
 
         UpdatePivotRotation(); // อัปเดตการหมุนของ pivot ทันที
+    }
+
+    // เมธอด SetState เพื่อเซตสถานะโดยตรง
+    public void SetState(bool on)
+    {
+        isOn = on;
+        if (output != null)
+        {
+            output.isOn = on;
+            output.UpdateState();
+        }
+        UpdatePivotRotation();
     }
 
     private void UpdatePivotRotation()
