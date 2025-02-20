@@ -17,7 +17,7 @@ public class QuizManager3 : MonoBehaviour
     }
 
     // -----------------------------
-    // 2) โครงสร้างของ LogicTask (โจทย์)
+    // 2) โครงสร้างของ LogicTask (โจทย์) 
     // -----------------------------
     [System.Serializable]
     public class LogicTask
@@ -84,9 +84,19 @@ public class QuizManager3 : MonoBehaviour
             LogicTask task = tasks[i];
             Debug.Log($"[Task {i + 1}] เริ่มตรวจโจทย์: {task.description}");
 
-            // 1) ตรวจ ToggleSwitch combinations (ในตัวอย่างนี้ ตั้งค่า default = true)
+            // 1) ตรวจ ToggleSwitch
             bool toggleCorrect = true;
             string toggleError = "";
+
+            // ตัวอย่าง: ถ้าขาด ToggleSwitch ตัวใดตัวหนึ่ง ให้ถือว่า toggleCorrect = false
+            for (int j = 0; j < task.toggleSwitches.Length; j++)
+            {
+                if (task.toggleSwitches[j] == null)
+                {
+                    toggleCorrect = false;
+                    toggleError += $"ToggleSwitch[{j}] ไม่ถูกผูกใน Task\n";
+                }
+            }
 
             // 2) ตรวจการเชื่อมต่อสายไฟผ่าน Gate
             (bool connectionCorrect, string connectionError) = CheckConnectionsWithError(task);
@@ -98,8 +108,8 @@ public class QuizManager3 : MonoBehaviour
             (bool truthTableCorrect, string truthTableError) = CheckTruthTableOutput(task);
 
             // สรุปความถูกต้องของทุกเงื่อนไข
-            bool isTaskAllCorrect = toggleCorrect 
-                                    && connectionCorrect 
+            bool isTaskAllCorrect = toggleCorrect
+                                    && connectionCorrect
                                     && hasGate
                                     && truthTableCorrect;
 
@@ -129,6 +139,7 @@ public class QuizManager3 : MonoBehaviour
         resultMessage = $"คะแนนรวม: {scoreAccumulated} / {GetMaxScore()}\n\nรายละเอียด:\n{messageBuilder}";
         Debug.Log(resultMessage);
     }
+
 
     // -----------------------------
     // 5) บังคับอัปเดตวงจร
@@ -424,10 +435,10 @@ public class QuizManager3 : MonoBehaviour
         // Connection Correct        = 10 คะแนน
         // Has Gate (>=1)            = 10 คะแนน
         // Truth Table Correct       = 70 คะแนน
-        if (isToggleCorrect)       scoreSum += 10;
-        if (isConnectionCorrect)   scoreSum += 10;
-        if (hasGate)               scoreSum += 10;
-        if (isTruthTableCorrect)   scoreSum += 70;
+        if (isToggleCorrect) scoreSum += 10;
+        if (isConnectionCorrect) scoreSum += 10;
+        if (hasGate) scoreSum += 10;
+        if (isTruthTableCorrect) scoreSum += 70;
 
         // ตัดคะแนนเกิน score ของโจทย์
         scoreSum = Mathf.Clamp(scoreSum, 0, task.score);
