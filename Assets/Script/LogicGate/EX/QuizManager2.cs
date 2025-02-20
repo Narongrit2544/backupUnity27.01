@@ -84,9 +84,19 @@ public class QuizManager2 : MonoBehaviour
             LogicTask task = tasks[i];
             Debug.Log($"[Task {i + 1}] เริ่มตรวจโจทย์: {task.description}");
 
-            // 1) ตรวจ ToggleSwitch combinations (ในตัวอย่างนี้ ตั้งค่า default = true)
+            // 1) ตรวจ ToggleSwitch
             bool toggleCorrect = true;
             string toggleError = "";
+
+            // ตัวอย่าง: ถ้าขาด ToggleSwitch ตัวใดตัวหนึ่ง ให้ถือว่า toggleCorrect = false
+            for (int j = 0; j < task.toggleSwitches.Length; j++)
+            {
+                if (task.toggleSwitches[j] == null)
+                {
+                    toggleCorrect = false;
+                    toggleError += $"ToggleSwitch[{j}] ไม่ถูกผูกใน Task\n";
+                }
+            }
 
             // 2) ตรวจการเชื่อมต่อสายไฟผ่าน Gate
             (bool connectionCorrect, string connectionError) = CheckConnectionsWithError(task);
@@ -98,8 +108,8 @@ public class QuizManager2 : MonoBehaviour
             (bool truthTableCorrect, string truthTableError) = CheckTruthTableOutput(task);
 
             // สรุปความถูกต้องของทุกเงื่อนไข
-            bool isTaskAllCorrect = toggleCorrect 
-                                    && connectionCorrect 
+            bool isTaskAllCorrect = toggleCorrect
+                                    && connectionCorrect
                                     && hasGate
                                     && truthTableCorrect;
 
@@ -121,6 +131,7 @@ public class QuizManager2 : MonoBehaviour
             else
             {
                 messageBuilder += $"[Task {i + 1}]: ยังไม่ถูกต้อง (ได้ {scoreThisTask} คะแนน)\n";
+                // รวม error ของแต่ละส่วนเข้าด้วยกัน
                 messageBuilder += toggleError + connectionError + gateError + truthTableError + "\n";
             }
         }
@@ -420,10 +431,10 @@ public class QuizManager2 : MonoBehaviour
         int scoreSum = 0;
 
         // ตัวอย่างให้ +25 คะแนนต่อส่วน (4 ส่วน = 100)
-        if (isToggleCorrect)       scoreSum += 10;
-        if (isConnectionCorrect)   scoreSum += 10;
-        if (hasGate)               scoreSum += 10;
-        if (isTruthTableCorrect)   scoreSum += 70;
+        if (isToggleCorrect) scoreSum += 10;
+        if (isConnectionCorrect) scoreSum += 10;
+        if (hasGate) scoreSum += 10;
+        if (isTruthTableCorrect) scoreSum += 70;
 
         // ตัดคะแนนเกิน score ของโจทย์
         scoreSum = Mathf.Clamp(scoreSum, 0, task.score);
@@ -487,5 +498,5 @@ public class QuizManager2 : MonoBehaviour
             Debug.Log($"NotifySpawnedObject: Spawned AndGate: {andGate.name}");
         }
     }
-    
+
 }
