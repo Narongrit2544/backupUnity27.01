@@ -4,6 +4,10 @@ using System.Collections.Generic;
 public class WireManager : MonoBehaviour
 {
     public GameObject wirePrefab; // Prefab สำหรับสายไฟ
+
+    // สำหรับเล่นเสียงคลิก
+    public AudioSource clickAudioSource;  // กำหนดใน Inspector ให้เป็น GameObject ที่มี AudioSource
+    public AudioClip clickSound;          // ไฟล์เสียงคลิกที่นำเข้ามาในโปรเจค
     private OutputConnector firstOutput = null; // เก็บ Output ที่ถูกคลิกตัวแรก
     private Dictionary<(OutputConnector, InputConnector), GameObject> wireConnections = new Dictionary<(OutputConnector, InputConnector), GameObject>(); // เก็บสายไฟที่เชื่อมต่อกัน
 
@@ -31,7 +35,12 @@ public class WireManager : MonoBehaviour
 
     public void SelectOutput(OutputConnector output)
     {
-        Debug.Log("SelectOutput called");
+        //Debug.Log("SelectOutput called");
+        // เล่นเสียงเมื่อเลือก Output
+        if (clickAudioSource != null && clickSound != null)
+        {
+            clickAudioSource.PlayOneShot(clickSound);
+        }
         if (firstOutput == null)
         {
             firstOutput = output;
@@ -40,6 +49,13 @@ public class WireManager : MonoBehaviour
 
     public void SelectInput(InputConnector input)
     {
+
+        // เล่นเสียงเมื่อเลือก Input
+        if (clickAudioSource != null && clickSound != null)
+        {
+            clickAudioSource.PlayOneShot(clickSound);
+        }
+
         if (firstOutput != null)
         {
             RemoveWire(input);

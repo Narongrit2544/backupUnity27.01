@@ -172,4 +172,11 @@ public class GoogleAuthen : MonoBehaviour
             statusText.text = message;
         }
     }
+
+    // ฟังก์ชันใหม่สำหรับเปิดเบราว์เซอร์ภายนอกและไปที่ Google
+    public void OpenGoogle()
+    {
+        Debug.Log("🔹 Opening Google in external browser");
+        Application.OpenURL("https://www.google.com");
+    }
 }
