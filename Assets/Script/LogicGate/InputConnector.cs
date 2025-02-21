@@ -41,7 +41,7 @@ public class InputConnector : MonoBehaviour
 
         if (other.gameObject.name.Contains("Pinch"))
         {
-            Debug.Log("Pinch detected! Selecting input.");
+            //Debug.Log("Pinch detected! Selecting input.");
             if (wireManager != null)
             {
                 wireManager.RemoveWire(this); // ลบสายไฟเก่าก่อน

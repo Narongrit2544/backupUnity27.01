@@ -1,10 +1,10 @@
 using UnityEngine;
 using TMPro;
 
-public class QuizUIController : MonoBehaviour
+public class QuizUIController2 : MonoBehaviour
 {
-    [Header("อ้างอิงไปยัง QuizManager")]
-    public QuizManager quizManager;  
+    [Header("อ้างอิงไปยัง QuizManager2")]
+    public QuizManager2 quizManager;  
 
     [Header("ตำแหน่ง TMP_Text ที่อยู่ใน Content ของ ScrollView")]
     public TMP_Text tasksScrollText; 

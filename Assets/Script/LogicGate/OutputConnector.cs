@@ -35,7 +35,7 @@ public class OutputConnector : MonoBehaviour
     {
         if (other.gameObject.name.Contains("Pinch"))
         {
-            Debug.Log("Pinch detected! Selecting output.");
+            //Debug.Log("Pinch detected! Selecting output.");
             if (wireManager != null)
             {
                 wireManager.SelectOutput(this);
