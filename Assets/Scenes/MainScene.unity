@@ -23756,7 +23756,7 @@ GameObject:
   - component: {fileID: 773789994}
   - component: {fileID: 773789993}
   m_Layer: 0
-  m_Name: manageObject
+  m_Name: ManageObjectAPI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -24084,7 +24084,7 @@ GameObject:
   - component: {fileID: 784148252}
   - component: {fileID: 784148251}
   m_Layer: 0
-  m_Name: GoogleAuthen
+  m_Name: GoogleAuthenApi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
