@@ -861,6 +861,7 @@ MonoBehaviour:
   canvas: {fileID: 2453967749929568928}
   intervalSlider: {fileID: 1939364526858328363}
   displayText: {fileID: 3725906278086504670}
+  toggleCanvasSound: {fileID: 8300000, guid: 4df8f1998f5cfdd4481ef82736938d4f, type: 3}
 --- !u!114 &2042872484128988139
 MonoBehaviour:
   m_ObjectHideFlags: 0

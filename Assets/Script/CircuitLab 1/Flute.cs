@@ -9,7 +9,7 @@ public class Flute : CircuitComponent, IResistor
     public GameObject infoCanvas;
     public TMP_Text labelResistanceText;
     public TMP_Text labelCurrentText;
-    public TMP_Dropdown resistanceDropdown; // ✅ เปลี่ยนจาก InputField เป็น Dropdown
+    public TMP_Dropdown resistanceDropdown; // เปลี่ยนจาก InputField เป็น Dropdown
     public TMP_Text resistanceValueText;
 
     [Header("Resistor Color Bands")]
@@ -20,6 +20,10 @@ public class Flute : CircuitComponent, IResistor
 
     [Header("Resistor Materials")]
     public Material[] resistorMaterials;
+
+    [Header("เสียง")]
+    public AudioClip pinchSound;   // เสียงเมื่อโดน pinch
+    private AudioSource audioSource; // สำหรับเล่นเสียง
 
     private bool isCanvasVisible = false;
     public double resistanceValue = 220f;
@@ -48,14 +52,19 @@ public class Flute : CircuitComponent, IResistor
 
     private void Start()
     {
-        // ✅ ตั้งค่า Dropdown เริ่มต้น
+        // ตรวจสอบ AudioSource
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
         if (resistanceDropdown != null)
         {
             resistanceDropdown.ClearOptions();
             resistanceDropdown.AddOptions(resistorValues);
             resistanceDropdown.onValueChanged.AddListener(delegate { UpdateResistanceFromDropdown(); });
 
-            // ✅ ตั้งค่าให้ตรงกับค่าปัจจุบัน
             int defaultIndex = resistorValues.FindIndex(value => value == "220");
             if (defaultIndex != -1)
             {
@@ -171,19 +180,17 @@ public class Flute : CircuitComponent, IResistor
 
     private void OnTriggerEnter(Collider other)
     {
-        //Debug.Log("✅ OnTriggerEnter ถูกเรียกโดย: " + other.gameObject.name);
-
         if (other.gameObject.name.Contains("Pinch"))
         {
-           // Debug.Log("🎯 Pinch ชนแล้ว! เปิด/ปิด Canvas");
+            // เล่นเสียง pinch ถ้ามีการตั้งค่า AudioClip
+            if (pinchSound != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(pinchSound);
+            }
             isCanvasVisible = !isCanvasVisible;
             if (infoCanvas != null)
             {
                 infoCanvas.SetActive(isCanvasVisible);
-            }
-            else
-            {
-                //Debug.LogWarning("⚠️ infoCanvas ยังไม่ได้เชื่อมโยงใน Inspector!");
             }
         }
     }

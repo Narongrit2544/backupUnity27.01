@@ -18,11 +18,22 @@ public class Clock : MonoBehaviour
     public Slider intervalSlider; // Slider สำหรับปรับค่า interval
     public TMP_Text displayText; // แสดงค่าที่ตั้งไว้
 
+    [Header("เสียง")]
+    public AudioClip toggleCanvasSound; // เสียงที่เล่นเมื่อเปิด/ปิด Canvas
+    private AudioSource audioSource;    // สำหรับเล่นเสียง
+
     private Coroutine clockCoroutine; // เก็บ Coroutine ของ Clock
     private bool isCanvasOpen = false; // เช็คสถานะของ Canvas
 
     private void Start()
     {
+        // ตรวจสอบหรือเพิ่ม AudioSource ให้กับ GameObject นี้
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
         if (canvas != null)
         {
             canvas.SetActive(false); // ปิด Canvas ตอนเริ่ม
@@ -30,23 +41,21 @@ public class Clock : MonoBehaviour
 
         if (intervalSlider != null)
         {
-            intervalSlider.minValue = 0.1f;  // กำหนดค่าน้อยสุดของ Slider
-            intervalSlider.maxValue = 5.0f;  // กำหนดค่าสูงสุดของ Slider
-            intervalSlider.value = interval; // ตั้งค่าเริ่มต้น
+            intervalSlider.minValue = 0.1f;
+            intervalSlider.maxValue = 5.0f;
+            intervalSlider.value = interval;
             intervalSlider.onValueChanged.AddListener(delegate { UpdateIntervalFromSlider(); });
         }
 
         if (displayText != null)
         {
-            displayText.text = "1.0s"; // ตั้งค่าเริ่มต้นของ DisplayText เป็น "1.0s"
+            displayText.text = "1.0s";
         }
 
         if (output != null)
         {
             output.isOn = isOn;
             output.UpdateState();
-
-            // ตั้งชื่อให้ Output
             output.gameObject.name = $"{gameObject.name}_OUT";
         }
 
@@ -66,14 +75,13 @@ public class Clock : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(interval); // รอเวลาตาม Interval
-            isOn = !isOn; // Toggle ค่า true/false
+            yield return new WaitForSeconds(interval);
+            isOn = !isOn;
             if (output != null)
             {
                 output.isOn = isOn;
-                output.UpdateState(); // ส่งค่าออกไปยังวงจร
+                output.UpdateState();
             }
-            //Debug.Log("Clock Pulse: " + (isOn ? "ON" : "OFF")); // แสดงสถานะ Clock ใน Console
         }
     }
 
@@ -81,19 +89,24 @@ public class Clock : MonoBehaviour
     {
         if (other.gameObject.name.Contains("Pinch"))
         {
-            ToggleCanvas(); // เรียกฟังก์ชันเปิด/ปิด Canvas
+            ToggleCanvas();
         }
     }
 
     private void ToggleCanvas()
     {
-        isCanvasOpen = !isCanvasOpen; // สลับสถานะของ Canvas
+        isCanvasOpen = !isCanvasOpen;
         if (canvas != null)
         {
-            canvas.SetActive(isCanvasOpen); // เปิด/ปิด Canvas ตามสถานะ
+            canvas.SetActive(isCanvasOpen);
+            // เล่นเสียงเปิด/ปิด canvas เมื่อมีการเปลี่ยนสถานะ
+            if (toggleCanvasSound != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(toggleCanvasSound);
+            }
             if (isCanvasOpen && intervalSlider != null)
             {
-                intervalSlider.value = interval; // ตั้งค่า Slider ให้ตรงกับค่า interval ปัจจุบัน
+                intervalSlider.value = interval;
             }
         }
     }
@@ -101,7 +114,7 @@ public class Clock : MonoBehaviour
     private void UpdateIntervalFromSlider()
     {
         interval = intervalSlider.value;
-        displayText.text = interval.ToString("0.0") + "s"; // อัปเดตค่าแสดงผล
-        StartClock(); // รีสตาร์ท Clock
+        displayText.text = interval.ToString("0.0") + "s";
+        StartClock();
     }
 }

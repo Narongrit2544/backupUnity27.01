@@ -8,6 +8,8 @@ public class ManagementCanvas : MonoBehaviour
     public GameObject modeMenu;   // หน้าที่ 3
     public GameObject saveMenu;   // หน้าที่ 4
 
+    public GameObject Mannual;   // หน้าที่ 5
+
     [Header("Object ที่จะเปิดเมื่อกดปุ่มที่ 2 ใน Mode Menu")]
     public GameObject mySpecialObject;
 
@@ -30,6 +32,7 @@ public class ManagementCanvas : MonoBehaviour
         modeMenu.SetActive(false);
         saveMenu.SetActive(false);
         mySpecialObject.SetActive(false);
+        Mannual.SetActive(false);
 
     }
 
@@ -55,6 +58,12 @@ public class ManagementCanvas : MonoBehaviour
     {
         ResetAllMenus();
         saveMenu.SetActive(true);
+    }
+
+     public void ShowManual()
+    {
+        ResetAllMenus();
+        Mannual.SetActive(true);
     }
 
     //===================== ปุ่มต่าง ๆ ใน Mode Menu =====================//
