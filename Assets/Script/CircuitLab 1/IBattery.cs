@@ -3,5 +3,5 @@ using System.Collections;
 
 public interface IBattery
 {
-    double BatteryVoltage { get; }
+    double BatteryVoltage { get; set;}
 }

@@ -47458,6 +47458,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
+    - target: {fileID: 3952073700977395991, guid: 11be42432e00dcc4ba7b2bcaa750b5b7, type: 3}
+      propertyPath: AutomaticMaxSize
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5155681994247123848, guid: 11be42432e00dcc4ba7b2bcaa750b5b7, type: 3}
       propertyPath: m_Text
       value: Manual
@@ -47540,7 +47544,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7686102743315469214, guid: 11be42432e00dcc4ba7b2bcaa750b5b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ShowModeMenu
+      value: ShowSecondMenu
       objectReference: {fileID: 0}
     - target: {fileID: 7686102743315469214, guid: 11be42432e00dcc4ba7b2bcaa750b5b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName

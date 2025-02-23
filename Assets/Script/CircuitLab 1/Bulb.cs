@@ -15,12 +15,15 @@ public class Bulb : CircuitComponent, IResistor
     public Light bulbLight;
 
     private bool cooldownActive = false;
-    private bool canReuse = true; // ✅ หลอดไฟใช้ได้ตอนเริ่มต้น
+    private bool canReuse = true; // หลอดไฟสามารถใช้ได้ตอนเริ่มต้น
     private float intensity = 0f;
 
+    // อาร์เรย์สีที่ใช้สำหรับการแสดงผล (ขึ้นอยู่กับค่าความต้านทาน)
     private Color[] colors = { Color.red, Color.yellow, Color.green, Color.blue, Color.magenta };
+    // อาร์เรย์ค่าความต้านทานที่สัมพันธ์กับสีแต่ละสี
     private float[] resistances = { 50f, 100f, 150f, 200f, 250f };
 
+    // index สำหรับเลือกสีจากอาร์เรย์ colors
     private int emissionColorIdx = 1;
 
     public double Resistance { get; private set; }
@@ -40,10 +43,8 @@ public class Bulb : CircuitComponent, IResistor
 
     public override void SetActive(bool isActive, bool isForward)
     {
-        if (!canReuse) return; // ✅ ป้องกันเปิดใหม่ถ้าหลอดขาด
-
+        if (!canReuse) return;
         IsActive = isActive;
-
         if (!isActive)
             DeactivateLight();
 
@@ -66,20 +67,17 @@ public class Bulb : CircuitComponent, IResistor
 
     private void ActivateLight()
     {
-        if (!canReuse) return; // ✅ ป้องกันเปิดใหม่ถ้าหลอดขาด
-
+        if (!canReuse) return;
         if (filament != null)
         {
             Renderer filamentRenderer = filament.GetComponent<Renderer>();
             Material filamentMaterial = filamentRenderer.material;
-
             filamentMaterial.EnableKeyword("_EMISSION");
+            // ใช้สีที่เลือกตาม emissionColorIdx
             Color baseColor = colors[emissionColorIdx];
             Color finalColor = baseColor * Mathf.Pow(2, intensity);
-
             filamentMaterial.SetColor("_EmissionColor", finalColor);
             filamentMaterial.SetFloat("_EmissionScale", 5.0f);
-
             if (bulbLight != null)
             {
                 bulbLight.enabled = true;
@@ -93,9 +91,9 @@ public class Bulb : CircuitComponent, IResistor
 
     public override void SetCurrent(double current)
     {
-        if (!canReuse) 
+        if (!canReuse)
         {
-            Current = 0; // ✅ หลอดขาด กระแสเป็น 0 เสมอ
+            Current = 0;
             if (labelCurrentText != null)
             {
                 labelCurrentText.text = "0.0 mA";
@@ -126,7 +124,6 @@ public class Bulb : CircuitComponent, IResistor
             float minIntensity = 3.0f;
             float pctCurrent = ((float)current > maxCurrent ? maxCurrent : (float)current) / maxCurrent;
             intensity = (pctCurrent * (maxIntensity - minIntensity)) + minIntensity;
-
             ActivateLight();
         }
     }
@@ -137,29 +134,27 @@ public class Bulb : CircuitComponent, IResistor
 
         Debug.Log("🔥 Bulb exploded and is now broken!");
 
-        // ✅ กระพริบหลอดไฟเร็วขึ้นก่อนดับ
         for (int i = 0; i < 3; i++)
         {
             filament.SetActive(!filament.activeSelf);
             yield return new WaitForSeconds(0.1f);
         }
 
-        // ✅ เปลี่ยนสีไส้หลอดไฟให้เป็นดำ (ไหม้)
         filament.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.black);
+
         if (bulbLight != null)
         {
-            bulbLight.enabled = false; // ✅ ปิดไฟ
+            bulbLight.enabled = false;
         }
 
-        // ✅ ปิดการทำงานของหลอดไฟทั้งหมด
         IsActive = false;
-        canReuse = false; // ✅ หลอดขาด ไม่สามารถใช้งานต่อได้
-        Resistance = double.PositiveInfinity; // ✅ หลอดขาด → ความต้านทานเป็นอนันต์ (กระแสเป็น 0)
+        canReuse = false;
+        Resistance = double.PositiveInfinity;
         Current = 0;
 
         if (labelCurrentText != null)
         {
-            labelCurrentText.text = "0.0 mA"; // ✅ แสดงว่ากระแสเป็น 0
+            labelCurrentText.text = "0.0 mA";
         }
 
         StopAllCircuits();
@@ -175,7 +170,7 @@ public class Bulb : CircuitComponent, IResistor
             {
                 if (component != null)
                 {
-                    component.SetCurrent(0); // ✅ ตัดกระแสทุกคอมโพเนนต์
+                    component.SetCurrent(0);
                 }
             }
         }
@@ -183,18 +178,14 @@ public class Bulb : CircuitComponent, IResistor
 
     void OnTriggerEnter(Collider other)
     {
-        if (!cooldownActive && IsActive && canReuse &&
-            other.gameObject.name.Contains("Pinch"))
+        if (!cooldownActive && IsActive && canReuse && other.gameObject.name.Contains("Pinch"))
         {
+            // เปลี่ยนสีโดยการเพิ่ม index และอัปเดทค่าความต้านทานตามอาร์เรย์ resistances
             emissionColorIdx = ++emissionColorIdx % colors.Length;
             Resistance = resistances[emissionColorIdx];
-
             labelResistanceText.text = Resistance.ToString("0.#") + "Ω";
-
             ActivateLight();
-
             StartCoroutine(PlaySound(colorChangeAudio, 0f));
-
             cooldownActive = true;
             Invoke("Cooldown", 0.5f);
         }
@@ -203,5 +194,28 @@ public class Bulb : CircuitComponent, IResistor
     void Cooldown()
     {
         cooldownActive = false;
+    }
+
+    // เมธอดสำหรับตั้งค่าความต้านทาน และอัปเดทสีตามค่าที่ตั้งใหม่
+    public void SetResistance(double newResistance)
+    {
+        Resistance = newResistance;
+
+        if (labelResistanceText != null)
+        {
+            labelResistanceText.text = newResistance.ToString("0.#") + "Ω";
+        }
+
+        // อัปเดท emissionColorIdx ให้ตรงกับ newResistance ถ้า newResistance ตรงกับค่าในอาร์เรย์ resistances
+        for (int i = 0; i < resistances.Length; i++)
+        {
+            if (Mathf.Approximately((float)newResistance, resistances[i]))
+            {
+                emissionColorIdx = i;
+                break;
+            }
+        }
+        // อัปเดทสีของหลอดไฟตาม emissionColorIdx ที่ได้
+        ActivateLight();
     }
 }

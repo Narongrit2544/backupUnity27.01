@@ -17,6 +17,10 @@ public class DeviceState
     public float positionX;
     public float positionY;
     public float positionZ;
+    
+    // ฟิลด์เพิ่มเติมสำหรับบันทึกค่าเฉพาะของอุปกรณ์
+    public double resistance;
+    public double batteryVoltage;
 }
 
 [System.Serializable]
@@ -65,6 +69,19 @@ public class SaveManager : MonoBehaviour
                 state.positionX = comp.GameObject.transform.localPosition.x;
                 state.positionY = comp.GameObject.transform.localPosition.y;
                 state.positionZ = comp.GameObject.transform.localPosition.z;
+
+                // บันทึกค่าความต้านทาน ถ้าอุปกรณ์นั้นมี IResistor
+                var resistor = comp.GameObject.GetComponent<IResistor>();
+                if (resistor != null)
+                {
+                    state.resistance = resistor.Resistance;
+                }
+                // บันทึกค่าแรงดัน ถ้าอุปกรณ์นั้นมี IBattery
+                var battery = comp.GameObject.GetComponent<IBattery>();
+                if (battery != null)
+                {
+                    state.batteryVoltage = battery.BatteryVoltage;
+                }
 
                 data.deviceStates.Add(state);
             }
@@ -125,7 +142,6 @@ public class SaveManager : MonoBehaviour
 
                     Debug.Log($"[LOAD] อุปกรณ์: {instance.name}, Position: {instance.transform.position}, LocalPosition: {instance.transform.localPosition}, Peg: {pegObj.name}");
 
-                    // ✅ ตรวจสอบว่า Component มี Rigidbody หรือไม่
                     Rigidbody rb = instance.GetComponent<Rigidbody>();
                     if (rb == null)
                     {
@@ -134,20 +150,16 @@ public class SaveManager : MonoBehaviour
                     rb.isKinematic = false;
                     rb.useGravity = true;
 
-                    // ✅ ดึง PegMgr และเชื่อมอุปกรณ์เข้ากับ Peg
                     PegMgr pegMgr = pegObj.GetComponent<PegMgr>();
                     if (pegMgr != null)
                     {
                         pegMgr.RegisterComponent(instance);
                         Debug.Log($"[LOAD] RegisterComponent เรียกใช้สำเร็จ: {instance.name} กับ {pegObj.name}");
                         
-                        // ✅ รอให้ PegMgr ตรวจจับก่อนเปลี่ยน Rigidbody
                         yield return new WaitForEndOfFrame();
 
                         rb.isKinematic = true;
                         rb.useGravity = false;
-
-                        // ✅ กระตุ้น Physics เพื่อให้ PegMgr ตรวจจับ OnTriggerEnter
                         Physics.Simulate(0.1f);
                     }
                     else
@@ -155,7 +167,36 @@ public class SaveManager : MonoBehaviour
                         Debug.LogError($"[ERROR] ไม่พบ PegMgr บน Peg: {pegObj.name}");
                     }
 
-                    // ✅ รอ 0.3 วินาทีก่อนโหลดตัวต่อไป
+                    // ตั้งค่าแรงดันของแบตเตอรี่ ถ้าอุปกรณ์นั้นเป็น IBattery
+                    var battery = instance.GetComponent<IBattery>();
+                    if (battery != null)
+                    {
+                        battery.BatteryVoltage = state.batteryVoltage;
+                    }
+
+                    // ตั้งค่าความต้านทาน ถ้าอุปกรณ์นั้นเป็น Bulb, Motor หรือ Flute
+                    var bulb = instance.GetComponent<Bulb>();
+                    if (bulb != null)
+                    {
+                        bulb.SetResistance(state.resistance);
+                    }
+                    else
+                    {
+                        var motor = instance.GetComponent<Motor>();
+                        if (motor != null)
+                        {
+                            motor.SetResistance(state.resistance);
+                        }
+                        else
+                        {
+                            var flute = instance.GetComponent<Flute>();
+                            if (flute != null)
+                            {
+                                flute.Resistance = state.resistance;
+                            }
+                        }
+                    }
+
                     yield return new WaitForSeconds(0.3f);
                 }
                 else

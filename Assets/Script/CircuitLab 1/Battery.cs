@@ -5,11 +5,22 @@ using TMPro;
 
 public class Battery : CircuitComponent, IBattery
 {
-    // Public members set in Unity Object Inspector
     public GameObject labelVoltage;
     public TMP_Text labelVoltageText;
 
-    public double BatteryVoltage { get;  set; }
+    private double batteryVoltage = 5f;
+    public double BatteryVoltage
+    {
+        get { return batteryVoltage; }
+        set
+        {
+            batteryVoltage = value;
+            if (labelVoltageText != null)
+            {
+                labelVoltageText.text = batteryVoltage.ToString("0.#") + "V";
+            }
+        }
+    }
 
     public Battery()
     {
@@ -18,23 +29,17 @@ public class Battery : CircuitComponent, IBattery
 
     protected override void Start()
     {
-        // Set voltage label text
         labelVoltageText.text = BatteryVoltage.ToString("0.#") + "V";
-        //Debug.Log($"Battery initialized: {gameObject.name}, Voltage: {BatteryVoltage}V");
-
     }
 
     protected override void Update()
     {
-        // Show/hide the labels
         labelVoltage.gameObject.SetActive(IsActive && Lab.showLabels);
     }
 
     public override void SetActive(bool isActive, bool isForward)
     {
         IsActive = isActive;
-
-        // Make sure label is right side up
         var rotationVoltage = labelVoltage.transform.localEulerAngles;
         var positionVoltage = labelVoltage.transform.localPosition;
         switch (Direction)
@@ -55,8 +60,6 @@ public class Battery : CircuitComponent, IBattery
                 Debug.Log("Unrecognized direction!");
                 break;
         }
-
-        // Apply label positioning
         labelVoltage.transform.localEulerAngles = rotationVoltage;
     }
 }
