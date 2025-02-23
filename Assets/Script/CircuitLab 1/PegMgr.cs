@@ -20,29 +20,39 @@ public class PegMgr : MonoBehaviour, IPeg
     GameObject clone = null;
     GameObject original = null;
     CircuitComponent originalScript = null;
+    // เพิ่มตัวแปรสำหรับเก็บความยาวของอุปกรณ์ (1 = short, 2 = long)
+    private int currentComponentLength = 1;
 
     void Start()
     {
+        // เรียก Component ของ clickSound (ไม่จำเป็นต้องเก็บค่าไว้)
         clickSound.GetComponent<AudioSource>();
+    }
+    public void RegisterComponent(GameObject component)
+    {
+        original = component;
+        originalScript = component.GetComponent<CircuitComponent>();
+        isOccupied = true;
     }
 
     IEnumerator PlaySound(AudioSource source, float delay)
     {
         yield return new WaitForSeconds(delay);
-
         source.Stop();
         source.Play();
     }
 
     void Update()
     {
-        // If we have an original object referenced, and that object has been dropped, center it on this peg
+        if (original != null)
+        {
+            Debug.Log($"[UPDATE] Peg: {this.name}, อุปกรณ์ที่เชื่อมอยู่: {original.name}");
+        }
+
+        // ถ้ามี original ที่อ้างอิงอยู่ และมันถูกปล่อย (ไม่ถูกจับอยู่)
         if (original && !originalScript.IsHeld)
         {
-            // If the component has already been placed, it must have temporarily been cloned on two different
-            // pegs. This can happen in high-velocity situations when a component enters the collider of a
-            // second peg before Unity invokes the exit callback from the collider of the first peg. In this,
-            // case, just destroy this clone since the component has already been locked to another location.
+            // ถ้าอุปกรณ์ถูกวางแล้ว (IsPlaced == true) ให้ลบ clone ทิ้ง
             if (originalScript.IsPlaced)
             {
                 DestroyClone();
@@ -50,48 +60,57 @@ public class PegMgr : MonoBehaviour, IPeg
                 return;
             }
 
-            // Lock it to the board
+            // คำนวณตำแหน่ง Peg จากฟังก์ชัน GetCoordinates()
             Point start = GetCoordinates();
+            // กำหนด parent ของ original ให้เป็น Peg นี้
             original.transform.parent = transform;
-            original.gameObject.GetComponent<Rigidbody>().useGravity = false;
-            original.gameObject.GetComponent<Rigidbody>().isKinematic = true; // เปลี่ยนจาก true เป็น false
+            original.GetComponent<Rigidbody>().useGravity = false;
+            original.GetComponent<Rigidbody>().isKinematic = true; // ทำให้ไม่โดน Physics
 
-            // Enable or keep colliders enabled to allow grabbing
-            original.gameObject.GetComponent<BoxCollider>().enabled = true; // เปลี่ยนจาก false เป็น true
-            //original.gameObject.GetComponent<SphereCollider>().enabled = false; // เปลี่ยนจาก false เป็น true
+            // เปิดใช้งาน collider ให้จับได้
+            original.GetComponent<BoxCollider>().enabled = true;
 
-            // Lock rotation to the nearest 90 degrees
+            // คำนวณ LockRotation และรับค่า end (ตำแหน่ง peg ปลายของอุปกรณ์)
             Point end = LockRotation(original, original);
 
-            // Notify the component itself where it has been placed
+            // คำนวณ Direction จากตำแหน่ง start กับ end
             Direction direction = GetDirection(start, end);
+            // แจ้งให้ CircuitComponent รู้ว่าอุปกรณ์ถูกวางที่ Peg ตำแหน่ง start พร้อม Direction
             originalScript.Place(start, direction);
 
-            // Discard the placeholder
+            // หลังจากวางแล้ว ให้ลบ clone
             DestroyClone();
 
-            // Play the click sound
+            // เล่นเสียงคลิก
             StartCoroutine(PlaySound(clickSound, clickStartTime));
 
-            // Add the component to our breadboard. This will also trigger a circuit simulation and
-            // activate any newly completed circuits.
+            // เพิ่มอุปกรณ์ลงในบอร์ด (CircuitLab.AddComponent จะสร้าง PlacedComponent)
             var lab = GameObject.Find("CircuitLab").gameObject;
             var script = lab.GetComponent<ICircuitLab>();
             if (script != null)
             {
                 script.AddComponent(original, start, end);
+
+                // หลังจาก AddComponent ให้ค้นหา PlacedComponent ที่เพิ่งถูกสร้างขึ้นมา
+                // เพื่อกำหนดค่า Direction กับ ComponentLength
+                CircuitLab circuitLab = lab.GetComponent<CircuitLab>();
+                PlacedComponent placed = circuitLab.GetPlacedComponents().Find(x => x.GameObject == original);
+                if (placed != null)
+                {
+                    placed.Direction = direction;
+                    placed.ComponentLength = currentComponentLength;
+                }
             }
 
             original = null;
         }
 
-        // If we have a clone, make sure the rotation changes when the user twists the component
+        // ถ้ามี clone อยู่ ให้เรียก LockRotation เพื่อให้ rotation เปลี่ยนตามการหมุนของผู้ใช้
         if (clone)
         {
             LockRotation(clone, original);
         }
     }
-
 
     public void Reset()
     {
@@ -103,11 +122,10 @@ public class PegMgr : MonoBehaviour, IPeg
 
     Point GetCoordinates()
     {
-        string name = transform.name.Substring(4);
-
+        // สมมุติว่าชื่อของ Peg มีรูปแบบ "Peg_row_col"
+        string name = transform.name.Substring(4); // ตัด "Peg_"
         int row = int.Parse(name.Substring(0, name.IndexOf('_')));
         int col = int.Parse(name.Substring(name.IndexOf('_') + 1));
-
         return new Point(col, row);
     }
 
@@ -115,16 +133,18 @@ public class PegMgr : MonoBehaviour, IPeg
     {
         float offset = shortPositionOffset;
         int pegOffset = 1;
-        if (reference.transform.name.Contains("LongWire"))
+        // ตรวจสอบว่าชื่อของ reference มี "LongWire" หรือไม่
+        if (reference != null && reference.transform.name.Contains("LongWire"))
         {
             offset = longPositionOffset;
             pegOffset = 2;
         }
 
-        // Find the locations of all 4 neighboring pegs
+        // คำนวณตำแหน่งของ Peg ปัจจุบัน
         Point coords = GetCoordinates();
         Point end = new Point(coords.x, coords.y);
 
+        // หาชื่อและตำแหน่งของ Peg ที่อยู่รอบ ๆ
         string north = "Peg_" + (coords.y + pegOffset) + "_" + coords.x;
         Point ptNorth = new Point(coords.x, coords.y + pegOffset);
         string south = "Peg_" + (coords.y - pegOffset) + "_" + coords.x;
@@ -134,7 +154,7 @@ public class PegMgr : MonoBehaviour, IPeg
         string west = "Peg_" + coords.y + "_" + (coords.x - pegOffset);
         Point ptWest = new Point(coords.x - pegOffset, coords.y);
 
-        // Find out if any of these are blocked and should be ignored
+        // ดึง CircuitLab เพื่อเช็ค slot ว่าง
         var lab = GameObject.Find("CircuitLab").gameObject;
         var script = lab.GetComponent<ICircuitLab>();
         Point start = GetCoordinates();
@@ -149,16 +169,10 @@ public class PegMgr : MonoBehaviour, IPeg
             }
         }
 
-        // Highlight each neighbor when debugging
-        //HighlightNeighbor(north, Color.red);
-        //HighlightNeighbor(east, Color.yellow);
-        //HighlightNeighbor(south, Color.green);
-        //HighlightNeighbor(west, Color.blue);
-
-        // Figure out which one is closest to the 2nd wire endpoint
+        // หาชื่อของ Peg ที่ใกล้เคียงที่สุดกับปลายสาย
         string closest = GetClosestNeighbor(reference, freeNeighbors);
 
-        // Lock the clone so that it points to that endpoint
+        // ตั้งค่า rotation และตำแหน่งของ target ตาม Peg ที่เลือก
         var rotation = target.transform.localEulerAngles;
         var position = target.transform.localPosition;
         rotation.x = -90;
@@ -185,7 +199,7 @@ public class PegMgr : MonoBehaviour, IPeg
             position.z = offset;
             end.y -= pegOffset;
         }
-        else
+        else // west
         {
             rotation.z = 270;
             position.x = offset;
@@ -198,32 +212,12 @@ public class PegMgr : MonoBehaviour, IPeg
         return end;
     }
 
-    void HighlightNeighbor(string name, Color color)
-    {
-        var neighbor = GameObject.Find(name);
-        if (neighbor)
-        {
-            DrawLine(transform.position, neighbor.transform.position, color);
-        }
-    }
-
-    Direction GetDirection(Point start, Point end)
-    {
-        if (end.y > start.y)
-            return Direction.North;
-        else if (end.y < start.y)
-            return Direction.South;
-        else if (end.x > start.x)
-            return Direction.East;
-        else
-            return Direction.West;
-    }
-
     string GetClosestNeighbor(GameObject clone, List<string> names)
     {
         string closest = names[0];
         GameObject closestNeighbor = null;
         float min = 999;
+        // สมมุติว่ามี child ที่ชื่อ "WireEnd2" เพื่อใช้หาตำแหน่งปลายสาย
         var endpoint = clone.transform.Find("WireEnd2");
 
         foreach (string name in names)
@@ -240,32 +234,24 @@ public class PegMgr : MonoBehaviour, IPeg
                 }
             }
         }
-
-        // Draw a visible line to the closest neighbor to aid in debugging
-        //DrawLine(endpoint.transform.position, closestNeighbor.transform.position, Color.red);
-
         return closest;
     }
 
-    void DrawLine(Vector3 start, Vector3 end, Color color)
+    Direction GetDirection(Point start, Point end)
     {
-        GameObject myLine = new GameObject();
-        myLine.transform.position = start;
-        myLine.AddComponent<LineRenderer>();
-        LineRenderer lr = myLine.GetComponent<LineRenderer>();
-        lr.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
-        lr.startColor = color;
-        lr.endColor = color;
-        lr.startWidth = 0.02f;
-        lr.endWidth = 0.02f;
-        lr.SetPosition(0, start);
-        lr.SetPosition(1, end);
-        GameObject.Destroy(myLine, Time.deltaTime);
+        if (end.y > start.y)
+            return Direction.North;
+        else if (end.y < start.y)
+            return Direction.South;
+        else if (end.x > start.x)
+            return Direction.East;
+        else
+            return Direction.West;
     }
 
     void OnTriggerEnter(Collider other)
     {
-        // Only deal with sphere colliders
+        // เฉพาะกับ SphereCollider เท่านั้น
         if (other.GetType() != typeof(SphereCollider))
         {
             return;
@@ -273,13 +259,14 @@ public class PegMgr : MonoBehaviour, IPeg
 
         if (!isOccupied && other.name.StartsWith("Component"))
         {
-            int componentLength = 1;
+            // กำหนดความยาวของอุปกรณ์
+            currentComponentLength = 1;
             if (other.transform.name.Contains("LongWire"))
             {
-                componentLength = 2;
+                currentComponentLength = 2;
             }
 
-            // Figure out if this peg has any free slots
+            // ตรวจสอบว่า Peg นี้มี slot ว่างหรือไม่
             var lab = GameObject.Find("CircuitLab").gameObject;
             var script = lab.GetComponent<ICircuitLab>();
             if (script == null)
@@ -287,37 +274,38 @@ public class PegMgr : MonoBehaviour, IPeg
                 return;
             }
             Point start = GetCoordinates();
-            int freeSlots = script.GetFreeComponentSlots(start, componentLength);
+            int freeSlots = script.GetFreeComponentSlots(start, currentComponentLength);
 
-            // If not, ignore this trigger enter event
             if (freeSlots == 0)
             {
                 return;
             }
 
-            // Remember which object we are cloning
+            // จดจำวัตถุดิบที่จะถูก clone
             original = other.gameObject;
             originalScript = original.GetComponent<CircuitComponent>();
 
-            // Create a clone of the object
+            // สร้าง clone ของวัตถุ
             clone = Instantiate(other.gameObject);
             clone.GetComponent<Rigidbody>().detectCollisions = false;
             var cloneScript = clone.GetComponent<CircuitComponent>();
             cloneScript.IsClone = true;
 
-            // Lock the clone in place
-            clone.gameObject.GetComponent<Rigidbody>().useGravity = false;
-            clone.gameObject.GetComponent<Rigidbody>().isKinematic = false;
+            // ปิด gravity และตั้งค่า Rigidbody ให้ไม่กระทบ Physics
+            clone.GetComponent<Rigidbody>().useGravity = false;
+            clone.GetComponent<Rigidbody>().isKinematic = false;
 
-            // Place the clone on the peg
+            // วาง clone ลงใน Peg นี้
             clone.transform.parent = transform;
             isOccupied = true;
+
+            Debug.Log($"[TRIGGER ENTER] Peg: {this.name}, อุปกรณ์: {original.name} เริ่มการเชื่อมต่อ");
+
         }
     }
 
     void OnTriggerExit(Collider other)
     {
-        // Only deal with sphere colliders
         if (other.GetType() != typeof(SphereCollider))
         {
             return;
@@ -325,14 +313,12 @@ public class PegMgr : MonoBehaviour, IPeg
 
         if (other.name.StartsWith("Component"))
         {
-            // Forget about the original for now
             if (original)
             {
+                Debug.Log($"[TRIGGER EXIT] Peg: {this.name}, อุปกรณ์: {original.name} หลุดออกจาก Peg");
                 original.transform.parent = null;
                 original = null;
             }
-
-            // Delete the clone on the peg
             DestroyClone();
         }
     }

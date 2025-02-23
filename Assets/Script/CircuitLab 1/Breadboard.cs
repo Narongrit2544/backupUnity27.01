@@ -12,6 +12,11 @@ public class PlacedComponent
     public CircuitComponent Component { get; private set; }
     public Point Start { get; set; }
     public Point End { get; set; }
+
+    // เพิ่มฟิลด์ใหม่สำหรับแนวทาง A
+    public Direction Direction { get; set; }      // North, South, East, West
+    public int ComponentLength { get; set; }      // 1 = short, 2 = long
+    
     public int Generation { get; set; }
     public int ShortCircuitGeneration { get; set; }
     public bool ShortCircuitForward { get; set; }

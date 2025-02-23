@@ -8916,6 +8916,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3507782900037008153, guid: 78a81390ee38e1441930c9fdefe4f834, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3507782900037008228, guid: 78a81390ee38e1441930c9fdefe4f834, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -33410,7 +33414,7 @@ PrefabInstance:
     - target: {fileID: 202755542466994759, guid: 5a2818b3357994345b8c0e3966059a2c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1889809393}
     - target: {fileID: 202755542466994759, guid: 5a2818b3357994345b8c0e3966059a2c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
@@ -33425,7 +33429,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 202755542466994759, guid: 5a2818b3357994345b8c0e3966059a2c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: 
+      value: SaveGame
       objectReference: {fileID: 0}
     - target: {fileID: 202755542466994759, guid: 5a2818b3357994345b8c0e3966059a2c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
@@ -33433,7 +33437,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 202755542466994759, guid: 5a2818b3357994345b8c0e3966059a2c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: ManagementCanvas, Assembly-CSharp
+      value: SaveManager, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 202755542466994759, guid: 5a2818b3357994345b8c0e3966059a2c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
@@ -37168,7 +37172,7 @@ PrefabInstance:
     - target: {fileID: 202755542466994759, guid: 5a2818b3357994345b8c0e3966059a2c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1889809393}
     - target: {fileID: 202755542466994759, guid: 5a2818b3357994345b8c0e3966059a2c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
@@ -37183,7 +37187,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 202755542466994759, guid: 5a2818b3357994345b8c0e3966059a2c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: 
+      value: LoadGame
       objectReference: {fileID: 0}
     - target: {fileID: 202755542466994759, guid: 5a2818b3357994345b8c0e3966059a2c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
@@ -37191,7 +37195,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 202755542466994759, guid: 5a2818b3357994345b8c0e3966059a2c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: ManagementCanvas, Assembly-CSharp
+      value: SaveManager, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 202755542466994759, guid: 5a2818b3357994345b8c0e3966059a2c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
@@ -43103,6 +43107,62 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: aab71263307da4a4fa0237fbf350a6f7, type: 3}
   m_PrefabInstance: {fileID: 220656960}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1889809392
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1889809394}
+  - component: {fileID: 1889809393}
+  m_Layer: 0
+  m_Name: TestSave
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1889809393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1889809392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ca263c0d1590734c88457892ff55331, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fileName: savegame.json
+  availablePrefabs:
+  - {fileID: 1897643511}
+  - {fileID: 1293546087}
+  - {fileID: 623344780}
+  - {fileID: 1728495431}
+  - {fileID: 99613672}
+  - {fileID: 377784978}
+  - {fileID: 1441195805}
+  - {fileID: 689024661}
+  - {fileID: 1669081755}
+  - {fileID: 1025287227}
+--- !u!4 &1889809394
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1889809392}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -207.70003, y: -93.75114, z: 246.64972}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1892248711 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: d087852b9ea80cb4d802114efaf7c232, type: 3}
@@ -47864,7 +47924,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5575501952818378301, guid: fd2d0936c1e6dc846941d3f95c57d328, type: 3}
       propertyPath: m_Name
-      value: ComponentWire (1)
+      value: ComponentWire
       objectReference: {fileID: 0}
     - target: {fileID: 5575501952818378301, guid: fd2d0936c1e6dc846941d3f95c57d328, type: 3}
       propertyPath: m_Layer
@@ -50363,3 +50423,4 @@ SceneRoots:
   - {fileID: 42640546}
   - {fileID: 1128634444}
   - {fileID: 817857913}
+  - {fileID: 1889809394}

@@ -92,26 +92,50 @@ public class CircuitLab : MonoBehaviour, ICircuitLab
     }
 
     public void Reset()
+{
+    // Find all dispensers and tell them to clean up their components
+    GameObject[] dispensers;
+    dispensers = GameObject.FindGameObjectsWithTag("Dispenser");
+    foreach (GameObject dispenser in dispensers)
     {
-        // Find all dispensers and tell them to clean up their components
-        GameObject[] dispensers;
-        dispensers = GameObject.FindGameObjectsWithTag("Dispenser");
-        foreach (GameObject dispenser in dispensers)
-        {
-            dispenser.GetComponent<IDispenser>().Reset();
-        }
-
-        // Find all pegs and tell them to reset their state
-        GameObject[] pegs;
-        pegs = GameObject.FindGameObjectsWithTag("Peg");
-        foreach (GameObject peg in pegs)
-        {
-            peg.GetComponent<IPeg>().Reset();
-        }
-
-        // Reset all circuit lab state
-        board.Reset();
+        dispenser.GetComponent<IDispenser>().Reset();
     }
+
+    // Find all pegs and tell them to reset their state
+    GameObject[] pegs;
+    pegs = GameObject.FindGameObjectsWithTag("Peg");
+    foreach (GameObject peg in pegs)
+    {
+        peg.GetComponent<IPeg>().Reset();
+    }
+
+    // รีเซ็ตทั้งหมดใน board ทันที
+    board.Reset();
+
+    // รีเซ็ตการตั้งค่าต่างๆ สำหรับเสียงให้หยุดทันที
+    if (circuitSound.isPlaying)
+    {
+        circuitSound.Stop();
+    }
+    if (shortSound1.isPlaying)
+    {
+        shortSound1.Stop();
+    }
+    if (shortSound2.isPlaying)
+    {
+        shortSound2.Stop();
+    }
+
+    // รีเซ็ตค่าตัวแปรที่เกี่ยวข้องกับการทำงานทั้งหมด
+    numActiveCircuits = 0;
+    dynamicComponents.Clear();
+
+    // รีเซ็ตตำแหน่งต่างๆ ให้กลับสู่ตำแหน่งเริ่มต้น
+    transform.localPosition = new Vector3(transform.localPosition.x, yTableStart, transform.localPosition.z);
+
+    Debug.Log("Circuit lab reset completed.");
+}
+
 
     public void CreatePegs()
     {
@@ -123,6 +147,11 @@ public class CircuitLab : MonoBehaviour, ICircuitLab
                 CreatePeg(i, j);
             }
         }
+    }
+    public List<PlacedComponent> GetPlacedComponents()
+    {
+        // สมมุติว่า board เป็นตัวแปรที่เก็บข้อมูลของ PlacedComponent ทั้งหมด
+        return board.Components;
     }
 
     private void CreatePeg(int row, int col)
@@ -786,8 +815,8 @@ public class CircuitLab : MonoBehaviour, ICircuitLab
             entities.Add(new VoltageSource("V" + name, mid, start, 0f));
             entities.Add(new LosslessTransmissionLine(name, mid, end, end, mid));
         }
-       
-        
+
+
         else
         {
             Debug.Log("Unrecognized component: " + name);
