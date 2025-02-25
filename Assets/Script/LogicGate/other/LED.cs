@@ -10,36 +10,53 @@ public class LED : MonoBehaviour
 
     private Renderer ledRenderer;
     private Renderer targetRenderer;
-    private Light targetLight; // เพิ่ม Light สำหรับแสดงแสง
+    private Light targetLight; // สำหรับแสดงแสง
     private Material targetMaterial; // เก็บ Material ของ targetObject
 
     void Start()
     {
         ledRenderer = GetComponent<Renderer>();
 
+        // ถ้า input ยังไม่ถูกกำหนด ให้พยายามหาใน children
+        if (input == null)
+        {
+            input = GetComponentInChildren<InputConnector>();
+            if (input == null)
+            {
+                // ถ้ายังหาไม่เจอ ให้เพิ่ม Component ใหม่ลงใน GameObject นี้
+                input = gameObject.AddComponent<InputConnector>();
+            }
+        }
+
+        // ตั้งชื่อ Child Connector ให้ตรงกับรูปแบบที่ต้องการ เช่น "LED_1_IN"
+        // โดยใช้ชื่อของ LED ที่เป็น parent แล้วต่อด้วย "_IN"
+        if (input != null)
+        {
+            input.gameObject.name = $"{gameObject.name}_IN1";
+            Debug.Log("LED InputConnector name set to: " + input.gameObject.name);
+        }
+
+        // ตรวจสอบ targetObject และเพิ่ม light หากไม่มี
         if (targetObject != null)
         {
             targetRenderer = targetObject.GetComponent<Renderer>();
-            targetMaterial = targetRenderer.material; // ดึง Material มาใช้
-
+            if (targetRenderer != null)
+            {
+                targetMaterial = targetRenderer.material;
+            }
             targetLight = targetObject.GetComponent<Light>();
-
-            // ถ้า targetObject ไม่มี Light ให้เพิ่มเข้าไป
             if (targetLight == null)
             {
                 targetLight = targetObject.AddComponent<Light>();
-                targetLight.type = LightType.Point; // ใช้แสงแบบ Point Light
-                targetLight.range = 2.5f; // กำหนดระยะของแสง
-                targetLight.intensity = 0f; // เริ่มต้นที่ 0 (ปิดแสง)
-                targetLight.color = Color.red; // ตั้งค่าให้แสงเป็นสีแดง
+                targetLight.type = LightType.Point;
+                targetLight.range = 2.5f;
+                targetLight.intensity = 0f;
+                targetLight.color = Color.red;
             }
-        }
-        if (input != null)
-        {
-            input.gameObject.name = $"{gameObject.name}_IN";
         }
 
         UpdateState();
+        // เรียก UpdateState อีกครั้งถ้าจำเป็น
         UpdateState();
     }
 
@@ -60,29 +77,25 @@ public class LED : MonoBehaviour
                 ledRenderer.material.color = isActive ? Color.red : Color.gray;
             }
 
-            // เปลี่ยนสีของ targetObject และเพิ่ม Emission ให้เรืองแสง
-            if (targetRenderer != null)
+            // เปลี่ยนสีของ targetObject และปรับ Emission
+            if (targetRenderer != null && targetMaterial != null)
             {
                 targetRenderer.material.color = isActive ? Color.red : Color.gray;
-
-                if (targetMaterial != null)
+                if (isActive)
                 {
-                    if (isActive)
-                    {
-                        targetMaterial.EnableKeyword("_EMISSION");
-                        targetMaterial.SetColor("_EmissionColor", Color.red * 2f); // เพิ่มความเข้มของ Emission
-                    }
-                    else
-                    {
-                        targetMaterial.DisableKeyword("_EMISSION");
-                    }
+                    targetMaterial.EnableKeyword("_EMISSION");
+                    targetMaterial.SetColor("_EmissionColor", Color.red * 2f);
+                }
+                else
+                {
+                    targetMaterial.DisableKeyword("_EMISSION");
                 }
             }
 
-            // ควบคุมแสงของ targetObject
+            // ควบคุมแสง
             if (targetLight != null)
             {
-                targetLight.intensity = isActive ? 5f : 0f; // ปรับความสว่างของแสง
+                targetLight.intensity = isActive ? 5f : 0f;
             }
         }
     }

@@ -25,7 +25,7 @@ public class Buzzer : MonoBehaviour
 
         if (input != null)
         {
-            input.gameObject.name = $"{gameObject.name}_IN";
+            input.gameObject.name = $"{gameObject.name}_IN1";
         }
 
         UpdateState();
